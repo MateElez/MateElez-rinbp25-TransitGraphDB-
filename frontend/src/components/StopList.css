@@ -1,0 +1,139 @@
+.stop-list {
+    width: 300px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.stop-list-header {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+}
+
+.stop-list h2 {
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.search-box {
+    width: 100%;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.selected-stops-summary {
+    padding: 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.selected-stop-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 5px 0;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.start-point {
+    color: #4CAF50;
+    font-weight: 500;
+}
+
+.end-point {
+    color: #f44336;
+    font-weight: 500;
+}
+
+.remove-stop {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0 5px;
+}
+
+.remove-stop:hover {
+    color: #f44336;
+}
+
+.stops-container {
+    padding: 15px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.stop-card {
+    padding: 12px;
+    margin-bottom: 10px;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.stop-card:hover:not(.disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.stop-card.selected {
+    background: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.stop-card.disabled {
+    background: white;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.stop-card h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.stop-type {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.stop-operator {
+    color: #666;
+    font-size: 13px;
+    margin: 5px 0 0 0;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+}
+
+.error {
+    padding: 20px;
+    color: #f44336;
+    text-align: center;
+}

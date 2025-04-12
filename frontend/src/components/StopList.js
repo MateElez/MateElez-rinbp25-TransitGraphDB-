@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './StopList.css';
 
-const StopList = () => {
+const StopList = ({ onStopSelect, selectedStops, isSecondSelected }) => {
   const [stops, setStops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchStops = async () => {
@@ -21,20 +23,70 @@ const StopList = () => {
     fetchStops();
   }, []);
 
-  if (loading) return <div>Loading stops...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const filteredStops = stops.filter(stop =>
+    stop && stop.name && stop.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleStopClick = (stop) => {
+    onStopSelect(stop);
+  };
+
+  const isStopSelected = (stop) => {
+    return selectedStops.some(selected => selected.route_id === stop.route_id);
+  };
+
+  const getStopClassName = (stop) => {
+    if (isStopSelected(stop)) return 'stop-card selected';
+    if (selectedStops.length === 2 && !isStopSelected(stop)) return 'stop-card disabled';
+    return 'stop-card';
+  };
+
+  if (loading) return <div className="stop-list loading">Loading stops...</div>;
+  if (error) return <div className="stop-list error">Error: {error}</div>;
 
   return (
     <div className="stop-list">
-      <h2>All Stops</h2>
+      <div className="stop-list-header">
+        <h2>Bus Stops</h2>
+        <div className="search-box">
+          <input
+            type="text"
+            placeholder="Search stops..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="selected-stops-summary">
+        <h3>Selected Stops ({selectedStops.length}/2)</h3>
+        <div className="selected-stops-list">
+          {selectedStops.map((stop, index) => (
+            <div key={stop.route_id} className="selected-stop-item">
+              <span>
+                {index === 0 ? 'From: ' : 'To: '}{stop.name}
+              </span>
+              <button 
+                onClick={() => onStopSelect(stop)} 
+                className="remove-stop"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="stops-container">
-        {stops.map(stop => (
-          <div key={stop.id} className="stop-card">
+        {filteredStops.map(stop => (
+          <div
+            key={stop.route_id}
+            className={getStopClassName(stop)}
+            onClick={() => selectedStops.length < 2 || isStopSelected(stop) ? handleStopClick(stop) : null}
+          >
             <h3>{stop.name}</h3>
-            <p>Type: {stop.type}</p>
-            <p>Facilities: {stop.facilities.join(', ')}</p>
-            <p>Status: {stop.status}</p>
-            <p>Location: {stop.location.coordinates[1]}, {stop.location.coordinates[0]}</p>
+            <p className="stop-type">{stop.type}</p>
+            {stop.operator && <p className="stop-operator">Operator: {stop.operator}</p>}
           </div>
         ))}
       </div>
@@ -42,4 +94,4 @@ const StopList = () => {
   );
 };
 
-export default StopList; 
+export default StopList;

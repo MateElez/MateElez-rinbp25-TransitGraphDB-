@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 require('dotenv').config();
 const connectDB = require('./db/mongodb');
 const mongoose = require('mongoose');
@@ -145,6 +146,79 @@ app.post('/api/connect', async (req, res) => {
         await connectStopsInNeo4j(startId, endId);
         res.status(200).json({ message: 'Stops connected successfully' });
     } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Add OSRM routing endpoint
+app.get('/api/route/:startId/:endId', async (req, res) => {
+    try {
+        const startStop = await Stop.findOne({ route_id: req.params.startId });
+        const endStop = await Stop.findOne({ route_id: req.params.endId });
+
+        if (!startStop || !endStop) {
+            return res.status(404).json({ error: 'One or both stops not found' });
+        }
+
+        // Get shortest path from Neo4j with vehicle information
+        const result = await session.run(`
+            MATCH p = shortestPath((start:Stop {id: $startId})-[r:CONNECTED_TO*]->(end:Stop {id: $endId}))
+            UNWIND relationships(p) AS rel
+            RETURN nodes(p) as stops,
+                   [rel.vehicle_type] as vehicles,
+                   [rel.line_number] as lines
+        `, { startId: req.params.startId, endId: req.params.endId });
+
+        if (result.records.length === 0) {
+            return res.status(404).json({ error: 'No route found between these stops' });
+        }
+
+        const record = result.records[0];
+        const stops = record.get('stops');
+        const vehicles = record.get('vehicles');
+        const lines = record.get('lines');
+
+        // Get road-following route from OSRM
+        const osrmResponse = await axios.get(
+            `http://router.project-osrm.org/route/v1/driving/${startStop.geometry.coordinates[0]},${startStop.geometry.coordinates[1]};${endStop.geometry.coordinates[0]},${endStop.geometry.coordinates[1]}?overview=full&geometries=geojson`
+        );
+
+        // Calculate transfers by counting vehicle changes
+        let transfers = 0;
+        let currentVehicle = vehicles[0];
+        for (let i = 1; i < vehicles.length; i++) {
+            if (vehicles[i] !== currentVehicle) {
+                transfers++;
+                currentVehicle = vehicles[i];
+            }
+        }
+
+        // Create detailed route segments
+        const routeSegments = [];
+        for (let i = 0; i < stops.length - 1; i++) {
+            routeSegments.push({
+                from: stops[i].properties,
+                to: stops[i + 1].properties,
+                vehicleType: vehicles[i],
+                lineNumber: lines[i]
+            });
+        }
+
+        const route = {
+            path: osrmResponse.data.routes[0].geometry.coordinates.map(coord => ({
+                longitude: coord[0],
+                latitude: coord[1]
+            })),
+            distance: osrmResponse.data.routes[0].distance,
+            duration: osrmResponse.data.routes[0].duration,
+            transfers: transfers,
+            stops: stops.map(stop => stop.properties),
+            segments: routeSegments
+        };
+
+        res.json(route);
+    } catch (error) {
+        console.error('Route calculation error:', error);
         res.status(500).json({ error: error.message });
     }
 });
