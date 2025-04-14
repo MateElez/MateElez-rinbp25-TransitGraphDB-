@@ -6,7 +6,16 @@ const stopService = require('../services/stopService');
 router.get('/', async (req, res) => {
     try {
         const stops = await stopService.getAllStops();
-        res.json(stops);
+        // Ensure all stops have valid IDs and coordinates
+        const validatedStops = stops
+            .map(stop => stop.toObject())
+            .filter(stop => stop && stop.stop_id && stop.stop_name)
+            .map(stop => ({
+                ...stop,
+                stop_lat: parseFloat(stop.stop_lat),
+                stop_lon: parseFloat(stop.stop_lon)
+            }));
+        res.json(validatedStops);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -77,4 +86,4 @@ router.get('/type/:type', async (req, res) => {
     }
 });
 
-module.exports = router; 
+module.exports = router;

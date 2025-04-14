@@ -1,50 +1,28 @@
 const mongoose = require('mongoose');
 
 const stopSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    name: {
+    stop_id: {
         type: String,
         required: true
     },
-    location: {
-        type: {
-            type: String,
-            enum: ['Point'],
-            default: 'Point'
-        },
-        coordinates: {
-            type: [Number],
-            required: true
-        }
-    },
-    type: {
+    stop_name: {
         type: String,
-        enum: ['bus', 'tram', 'train'],
         required: true
     },
-    routes: [{
-        type: String,
-        ref: 'Route'
-    }],
-    facilities: [{
-        type: String,
-        enum: ['shelter', 'bench', 'ticket_machine', 'accessibility']
-    }],
-    status: {
-        type: String,
-        enum: ['active', 'maintenance', 'closed'],
-        default: 'active'
+    stop_lat: {
+        type: Number,
+        required: true
     },
-    lastUpdate: {
-        type: Date,
-        default: Date.now
+    stop_lon: {
+        type: Number,
+        required: true
+    },
+    location_type: {
+        type: Number,
+        default: 0
     }
+}, {
+    collection: 'stops'  // Explicitly set collection name
 });
 
-stopSchema.index({ location: '2dsphere' });
-
-module.exports = mongoose.model('Stop', stopSchema); 
+module.exports = mongoose.model('Stop', stopSchema, 'stops');
