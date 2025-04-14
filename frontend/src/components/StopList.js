@@ -6,13 +6,18 @@ const StopList = ({ onStopSelect, selectedStops, isSecondSelected }) => {
   const [stops, setStops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const fetchStops = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/stops');
-        setStops(response.data);
+        // Filter out empty or invalid stops
+        const validStops = response.data.filter(stop => 
+          stop.name && 
+          stop.name.trim() !== '' && 
+          stop.route_id
+        );
+        setStops(validStops);
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch stops');
@@ -22,10 +27,6 @@ const StopList = ({ onStopSelect, selectedStops, isSecondSelected }) => {
 
     fetchStops();
   }, []);
-
-  const filteredStops = stops.filter(stop =>
-    stop && stop.name && stop.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleStopClick = (stop) => {
     onStopSelect(stop);
@@ -48,14 +49,6 @@ const StopList = ({ onStopSelect, selectedStops, isSecondSelected }) => {
     <div className="stop-list">
       <div className="stop-list-header">
         <h2>Bus Stops</h2>
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search stops..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
       </div>
 
       <div className="selected-stops-summary">
@@ -78,7 +71,7 @@ const StopList = ({ onStopSelect, selectedStops, isSecondSelected }) => {
       </div>
 
       <div className="stops-container">
-        {filteredStops.map(stop => (
+        {stops.map(stop => (
           <div
             key={stop.route_id}
             className={getStopClassName(stop)}

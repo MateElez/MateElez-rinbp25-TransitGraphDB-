@@ -7,28 +7,33 @@ function App() {
   const [selectedStops, setSelectedStops] = useState([]);
 
   const handleStopSelect = (stop) => {
-    // Ako je stanica već odabrana, ukloni je
-    if (selectedStops.find(s => s.route_id === stop.route_id)) {
-      setSelectedStops(selectedStops.filter(s => s.route_id !== stop.route_id));
-    } else if (selectedStops.length < 2) { // Dozvoli odabir samo ako imamo manje od 2 stanice
-      setSelectedStops([...selectedStops, stop]);
-    }
+    setSelectedStops(prevStops => {
+      const isAlreadySelected = prevStops.some(s => s.route_id === stop.route_id);
+      if (isAlreadySelected) {
+        return prevStops.filter(s => s.route_id !== stop.route_id);
+      }
+      if (prevStops.length >= 2) {
+        return prevStops;
+      }
+      return [...prevStops, stop];
+    });
   };
 
   return (
     <div className="App">
       <header className="App-header">
-        <h2>Transit Planner</h2>
-        <p className="app-description">Planirajte svoje putovanje javnim prijevozom - odaberite polazište i odredište</p>
+        <h2>Transit Graph DB</h2>
+        <p className="app-description">Plan your route efficiently</p>
       </header>
-      <main className="App-content">
+      <div className="App-content">
         <StopList 
-          onStopSelect={handleStopSelect} 
+          onStopSelect={handleStopSelect}
           selectedStops={selectedStops}
-          isSecondSelected={selectedStops.length === 2}
         />
-        <Map selectedStops={selectedStops} />
-      </main>
+        <div className="main-content">
+          <Map selectedStops={selectedStops} />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,11 +1,16 @@
 .stop-list {
     width: 300px;
-    height: 100vh;
+    height: calc(100vh - 40px); /* Subtract space for Windows taskbar */
+    max-height: 100vh;
     background: white;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    position: fixed; /* Make it fixed position */
+    left: 0;
+    top: 0;
+    bottom: 40px; /* Leave space for Windows taskbar */
 }
 
 .stop-list-header {
@@ -18,20 +23,8 @@
 }
 
 .stop-list h2 {
-    margin: 0 0 15px 0;
+    margin: 0;
     color: #333;
-}
-
-.search-box {
-    width: 100%;
-}
-
-.search-box input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
 }
 
 .selected-stops-summary {
