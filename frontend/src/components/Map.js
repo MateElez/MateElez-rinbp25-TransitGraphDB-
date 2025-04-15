@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Map.css';
 import L from 'leaflet';
@@ -36,7 +36,7 @@ function MarkerUpdater({ selectedStops }) {
     return null;
 }
 
-const Map = ({ selectedStops }) => {
+const Map = ({ selectedStops, routePath }) => {
     // Validate coordinates before rendering markers
     const validStops = selectedStops?.filter(stop => 
         stop && 
@@ -45,6 +45,14 @@ const Map = ({ selectedStops }) => {
         !isNaN(stop.stop_lat) && 
         !isNaN(stop.stop_lon)
     ) || [];
+
+    // Find all stops in the route path
+    const routeStops = routePath ? routePath.map(stopId => 
+        selectedStops.find(stop => stop.stop_id === stopId)
+    ).filter(stop => stop) : [];
+
+    // Create route line coordinates if we have route stops
+    const routeCoordinates = routeStops.map(stop => [stop.stop_lat, stop.stop_lon]);
 
     return (
         <div className="map-container">
@@ -58,6 +66,7 @@ const Map = ({ selectedStops }) => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
                 <MarkerUpdater selectedStops={validStops} />
+                
                 {validStops.map((stop, index) => (
                     <Marker
                         key={stop.stop_id}
@@ -66,12 +75,21 @@ const Map = ({ selectedStops }) => {
                         <Popup>
                             <div className="stop-popup">
                                 <h3>{stop.stop_name}</h3>
-                                <p>{index === 0 ? 'From' : 'To'} Stop</p>
+                                <p>{index === 0 ? 'Start Stop' : 'End Stop'}</p>
                                 <p>Stop ID: {stop.stop_id}</p>
                             </div>
                         </Popup>
                     </Marker>
                 ))}
+
+                {routeCoordinates.length > 1 && (
+                    <Polyline 
+                        positions={routeCoordinates}
+                        color="blue"
+                        weight={3}
+                        opacity={0.7}
+                    />
+                )}
             </MapContainer>
         </div>
     );

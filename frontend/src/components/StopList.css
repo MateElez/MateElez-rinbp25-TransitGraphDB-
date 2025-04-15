@@ -1,36 +1,60 @@
 .stop-list {
     width: 300px;
-    height: calc(100vh - 40px); /* Subtract space for Windows taskbar */
-    max-height: 100vh;
+    height: 100vh;
     background: white;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    position: fixed; /* Make it fixed position */
+    position: fixed;
     left: 0;
     top: 0;
-    bottom: 40px; /* Leave space for Windows taskbar */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .stop-list-header {
     padding: 15px;
-    border-bottom: 1px solid #eee;
-    position: sticky;
-    top: 0;
     background: white;
-    z-index: 1;
+    z-index: 2;
+    flex-shrink: 0;
 }
 
-.stop-list h2 {
-    margin: 0;
+.stop-list-header h2 {
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
     color: #333;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
 
 .selected-stops-summary {
     padding: 15px;
     background: #f8f9fa;
     border-bottom: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.selected-stops-list {
+    margin-top: 10px;
+}
+
+.no-stops-message {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin: 0;
 }
 
 .selected-stop-item {
@@ -68,9 +92,10 @@
 }
 
 .stops-container {
-    padding: 15px;
-    flex-grow: 1;
+    flex: 1;
     overflow-y: auto;
+    padding: 15px;
+    border-top: 1px solid #eee;
 }
 
 .stop-card {
@@ -83,7 +108,7 @@
     transition: all 0.2s ease;
 }
 
-.stop-card:hover:not(.disabled) {
+.stop-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -100,8 +125,8 @@
 }
 
 .stop-card h3 {
-    margin: 0 0 5px 0;
-    font-size: 16px;
+    margin: 0;
+    font-size: 14px;
     color: #333;
 }
 
@@ -129,4 +154,45 @@
     padding: 20px;
     color: #f44336;
     text-align: center;
+}
+
+.route-controls {
+    padding: 0;
+    background: white;
+    border-top: 1px solid #eee;
+    margin-top: auto;
+}
+
+.route-error {
+    color: #f44336;
+    font-size: 14px;
+    padding: 8px 0;
+    margin: 0;
+    background-color: #ffebee;
+    text-align: center;
+    position: absolute;
+    bottom: 56px;
+    left: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.create-route-btn {
+    width: 100%;
+    height: 70px;
+    padding: 0;
+    background: #2196f3;
+    color: white;
+    border: none;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.create-route-btn:disabled {
+    background-color: #e0e0e0;
+    color: #9e9e9e;
+    cursor: not-allowed;
 }
