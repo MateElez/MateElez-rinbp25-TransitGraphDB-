@@ -52,14 +52,17 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// Find shortest path between stops
-router.post('/shortest-path', async (req, res) => {
+// POST /api/routes/shortest
+router.post('/shortest', async (req, res) => {
+    const { start_stop_id, end_stop_id } = req.body;
+    if (!start_stop_id || !end_stop_id) {
+        return res.status(400).json({ error: 'start_stop_id and end_stop_id are required' });
+    }
     try {
-        const { startStopId, endStopId } = req.body;
-        const path = await routeService.findShortestPath(startStopId, endStopId);
+        const path = await routeService.findShortestPath(start_stop_id, end_stop_id);
         res.json(path);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -73,4 +76,4 @@ router.get('/status/active', async (req, res) => {
     }
 });
 
-module.exports = router; 
+module.exports = router;

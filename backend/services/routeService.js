@@ -1,6 +1,15 @@
+require('dotenv').config();
 const routeRepository = require('../repositories/routeRepository');
 const stopRepository = require('../repositories/stopRepository');
 const neo4j = require('neo4j-driver');
+
+const driver = neo4j.driver(
+    process.env.NEO4J_URI || 'bolt://localhost:7687',
+    neo4j.auth.basic(
+        process.env.NEO4J_USER || 'neo4j',
+        process.env.NEO4J_PASSWORD || 'password'
+    )
+);
 
 class RouteService {
     constructor() {
@@ -113,9 +122,28 @@ class RouteService {
         }
     }
 
+    async findShortestPath(start_stop_id, end_stop_id) {
+        const session = driver.session();
+        try {
+            const cypher = `
+                MATCH (start:Stop {stop_id: $start_stop_id}), (end:Stop {stop_id: $end_stop_id})
+                MATCH path = shortestPath((start)-[:ROUTE*]-(end))
+                RETURN [n IN nodes(path) | n.stop_id] AS stop_ids, length(path) AS hops
+            `;
+            const result = await session.run(cypher, { start_stop_id, end_stop_id });
+            if (result.records.length === 0) {
+                throw new Error('No path found between the selected stops.');
+            }
+            const stop_ids = result.records[0].get('stop_ids');
+            return { stop_ids, hops: result.records[0].get('hops') };
+        } finally {
+            await session.close();
+        }
+    }
+
     async getActiveRoutes() {
         return await routeRepository.findActiveRoutes();
     }
 }
 
-module.exports = new RouteService(); 
+module.exports = new RouteService();

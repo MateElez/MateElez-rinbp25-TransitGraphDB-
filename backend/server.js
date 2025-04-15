@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const connectDB = require('./db/mongodb');
 const Stop = require('./models/Stop');
+const routeController = require('./controllers/routeController');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -28,6 +29,8 @@ app.get('/api/stops', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+app.use('/api/routes', routeController);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
